@@ -4,7 +4,7 @@ query=${1-codewise.org.}
 record=${2-any}
 
 # make sure the name ends in .
-query=`echo $query | sed -r 's/([^.])$/\1./'`
+query=$(echo $query | sed -r 's/([^.])$/\1./')
 
 # if no args, run "codewise.org. a"
 if [[ $1 == "" ]]; then
@@ -18,12 +18,12 @@ zone=$(dig $query ns +trace | grep NS | tail -1 | cut -f1)
 servers=$(dig $zone ns +short)
 
 # for padding
-maxlen=`echo $servers | awk '{max=0; for (i=1; i<=NF; i++) { if (length($(i)) > max) max = length($(i)); } print max}'`;
+maxlen=$(echo $servers | awk '{max=0; for (i=1; i<=NF; i++) { if (length($(i)) > max) max = length($(i)); } print max}')
 
 echo "checking \"$query $record\" in $zone's nameservers"
 for ns in $servers; do
     printf "%-${maxlen}s : " $ns
-    out=`dig @$ns $query $record +short`
+    out=(dig @$ns $query $record +short)
 
     if [[ $out == "" ]]; then
         echo "NOT FOUND"
