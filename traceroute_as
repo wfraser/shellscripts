@@ -1,0 +1,74 @@
+#!/bin/bash
+
+#
+# Fancy traceroute with autonomous systems output
+#
+# WRF 3/17/2011
+# WRF 5/31/2011 added short mode
+#
+
+gawk_args=""
+if [[ $1 == "-s" || $1 == "--short" ]]; then
+    gawk_args="$gawk_args --assign short_mode=1";
+    shift
+fi
+
+traceroute -w 2 -q 1 -n $@ 2>&1 | gawk $gawk_args '
+BEGIN{
+    path=""
+    last=""
+}
+{
+    if (NR == 1) {
+        printf ("traceroute to " $3 (short_mode ? " " : "\n"));
+        next;
+    } else if ($1 == "traceroute") {
+        next;
+    }
+
+    if (short_mode) {
+        printf(".");
+    }
+
+    hop=$1
+    ip=$2; host="";
+    if (ip == "*") {
+        if (short_mode) {
+            path = path " ?";
+        } else {
+            printf("%-2s | <no response>\n", NR);
+        }
+        next;
+    }
+    "whois -h whois.cymru.com " ip " | tail -n1" | getline;
+    asnum  = $1;
+    asname = $5;
+    if (asnum == "NA") { 
+        asnum  = "?";
+        asname = "?";
+    }
+
+    if (asnum != last) {
+        if (asnum == "?") {
+            path = path " ?";
+        } else {
+            path = path " " asname;
+        }
+    }
+    last = asnum;
+
+    if (!short_mode) {
+        "dig -x " ip " +short | tail -n1" | getline host;
+
+        printf("%-2s | %-10s\t| %-15s | %-50.50s | %s\n", hop,asnum,ip,host,asname)
+    }
+}
+END {
+    if (short_mode) {
+        printf(" %d hops\n", NR - 1);
+        print substr(path, 2);
+    }
+}
+'
+
+#kthxbai
