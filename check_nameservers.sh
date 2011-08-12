@@ -12,7 +12,7 @@ if [[ $1 == "" ]]; then
 fi
 
 # find the lowest zone with a nameserver record
-zone=$(dig $query ns +trace | grep NS | tail -1 | cut -f1)
+zone=$(dig $query ns +trace | egrep "IN\s+NS" | tail -1 | cut -f1)
 
 # look up nameservers for that zone
 servers=$(dig $zone ns +short)
@@ -25,7 +25,9 @@ for ns in $servers; do
     printf "%-${maxlen}s : " $ns
     out=$(dig @$ns $query $record +short)
 
-    if [[ $out == "" ]]; then
+    if [[ $? != 0 ]]; then
+        echo "QUERY ERROR: $out"
+    elif [[ $out == "" ]]; then
         echo "NOT FOUND"
     else
         echo -n $out
