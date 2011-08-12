@@ -30,7 +30,7 @@ for file in /proc/*/fd/0; do
 
         args=$(sed -r 's/ /\\ /g;s/\x0/ /g' < /proc/$pid/cmdline)
 
-        echo -e "$pid $user:$group $cwd $exe $args"
+        echo "$pid $user:$group $cwd $exe $args"
     fi;
 done
 
