@@ -19,8 +19,8 @@ for file in /proc/*/fd/0; do
         uid=$(awk '/^Uid:/{print $2}' /proc/$pid/status)
         gid=$(awk '/^Gid:/{print $2}' /proc/$pid/status)
 
-        user=$(awk 'BEGIN{FS=":"} {if($3=="'$uid'") print $1}' /etc/passwd)
-        group=$(awk 'BEGIN{FS=":"} {if($3=="'$gid'") print $1}' /etc/group)
+        user=$(awk 'BEGIN{FS=":"} {if($3=="'$uid'") { print $1; exit; } }' /etc/passwd)
+        group=$(awk 'BEGIN{FS=":"} {if($3=="'$gid'") { print $1; exit; } }' /etc/group)
 
         [ "$user" == "" ] && user=$uid
         [ "$group" == "" ] && group=$gid
@@ -28,7 +28,7 @@ for file in /proc/*/fd/0; do
         cwd=$(readlink /proc/$pid/cwd | escape)
         exe=$(readlink /proc/$pid/exe | escape)
 
-        args=$(cat /proc/$pid/cmdline | sed -r 's/ /\\ /g;s/\x0/ /g')
+        args=$(sed -r 's/ /\\ /g;s/\x0/ /g' < /proc/$pid/cmdline)
 
         echo -e "$pid $user:$group $cwd $exe $args"
     fi;
