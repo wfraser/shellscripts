@@ -23,7 +23,7 @@ maxlen=$(echo $servers | awk '{max=0; for (i=1; i<=NF; i++) { if (length($(i)) >
 echo "checking \"$query $record\" in $zone's nameservers"
 for ns in $servers; do
     printf "%-${maxlen}s : " $ns
-    out=(dig @$ns $query $record +short)
+    out=$(dig @$ns $query $record +short)
 
     if [[ $out == "" ]]; then
         echo "NOT FOUND"
