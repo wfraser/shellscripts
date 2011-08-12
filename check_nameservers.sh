@@ -26,7 +26,7 @@ for ns in $servers; do
     out=$(dig @$ns $query $record +short)
 
     if [[ $? != 0 ]]; then
-        echo "QUERY ERROR: $out"
+        echo -n "QUERY ERROR: $out" | awk '{if(NR != 1) print "\t" $0; else print $0}'
     elif [[ $out == "" ]]; then
         echo "NOT FOUND"
     else
