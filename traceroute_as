@@ -52,7 +52,7 @@ BEGIN{
         if (asnum == "?") {
             path = path " ?";
         } else {
-            path = path " " asname;
+            path = path " " asnum "/" asname;
         }
     }
     last = asnum;
